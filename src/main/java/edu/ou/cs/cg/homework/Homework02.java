@@ -68,9 +68,9 @@ public final class Homework02
 		GLCanvas		canvas = new GLCanvas(capabilities);
 		JFrame			frame = new JFrame("Homework02");
 
-		canvas.setPreferredSize(new Dimension(750, 750));
+		canvas.setPreferredSize(new Dimension(1050, 550));
 
-		frame.setBounds(50, 50, 600, 600);
+		frame.setBounds(50, 50, 1000, 500);
 		frame.getContentPane().add(canvas);
 		frame.pack();
 		frame.setVisible(true);
