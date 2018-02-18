@@ -57,6 +57,11 @@ public final class Homework02
 	private int				h;			// Canvas height
 	private TextRenderer	renderer;
 
+	private final float MAX_X = 1.0f;
+	private final float MAX_Y = 1.0f;
+
+	private final float ROAD_LIM = -0.55f;
+
 	//**********************************************************************
 	// Main
 	//**********************************************************************
@@ -134,10 +139,8 @@ public final class Homework02
 
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT);		// Clear the buffer
 
-		//setProjection(gl);						// Use a coordinate system
-
-		drawSomething(gl);						// Draw something
-		drawSomeText(drawable);					// Draw some text
+		// Draw the road
+		this.drawRoad(gl);
 	}
 
 	//**********************************************************************
@@ -156,6 +159,112 @@ public final class Homework02
 	//**********************************************************************
 	// Private Methods (Scene)
 	//**********************************************************************
+
+	private void drawRoad(GL2 gl)
+	{
+		final float DELTA = 0.2f;
+		final float HEIGHT = 0.4f;
+		final float OFFSET = 0.05f;
+		final float GRAY_VAL = 0.61f;
+		float rootX = -1.0f - OFFSET;
+		float rootY = -1.0f;
+
+		// Draw gray background to the road
+		final Point2D.Float one = new Point2D.Float(rootX, rootY);
+		final Point2D.Float two = new Point2D.Float(MAX_X, rootY);
+		final Point2D.Float three = new Point2D.Float(MAX_X, -1.0f + HEIGHT);
+		final Point2D.Float four = new Point2D.Float(rootX, -1.0f + HEIGHT);
+		final float[] color = new float[]{GRAY_VAL, GRAY_VAL, GRAY_VAL};
+		this.drawQuad(gl, one, two, three, four, color);
+
+		// Draw hopscotch pattern
+		this.drawHopscotch(gl);
+
+		// Draw the lines on the road
+		final float[] white = new float[]{1.0f, 1.0f, 1.0f};
+		this.drawLine(gl, new Point2D.Float(rootX, -1.0f + HEIGHT), new Point2D.Float(MAX_X, -1.0f + HEIGHT), white);
+		this.drawLine(gl, new Point2D.Float(rootX, -1.0f), new Point2D.Float(MAX_X, -1.0f), white);
+		for(float x = rootX; x < 1.15; x += DELTA)
+		{
+			this.drawLine(gl, new Point2D.Float(x, -1.0f), new Point2D.Float(x + OFFSET, -1.0f + HEIGHT), white);
+		}
+	}
+
+	private void drawHopscotch(GL2 gl)
+	{
+		final float DELTA = 0.1f;
+		final float OFFSET = 0.015f;
+		final float HEIGHT = DELTA;
+
+		final float[] outline = new float[]{1.0f, 1.0f, 1.0f};
+		final float[] fill = new float[]{0.9f, 0.837f, 0.735f};
+		final Point2D.Float startRect = new Point2D.Float(0f, ROAD_LIM - 0.3f);
+		this.drawHopRect(gl, startRect, outline, fill);
+		this.drawHopRect(gl, new Point2D.Float((float)startRect.getX() + DELTA, (float)startRect.getY()), outline, fill);
+		final Point2D.Float endHalf = new Point2D.Float((float)startRect.getX() + DELTA*2, (float)startRect.getY());
+		this.drawHopRect(gl, endHalf, outline, fill);
+
+		final Point2D.Float endHalfBot =  new Point2D.Float((float)endHalf.getX() + DELTA, (float)endHalf.getY());
+		final Point2D.Float endHalfTop = new Point2D.Float((float)endHalf.getX() + DELTA + OFFSET,(float)endHalf.getY() + HEIGHT);
+		final Point2D.Float startHalf = this.computeStartDiagRect(endHalfBot, endHalfTop);
+		this.drawHopRect(gl, startHalf, outline, fill);
+		this.drawHopRect(gl, new Point2D.Float((float)startHalf.getX() - OFFSET, (float)startHalf.getY() - HEIGHT), outline, fill);
+
+		final Point2D.Float endSecondHalf = new Point2D.Float((float)startRect.getX() + DELTA*4, (float)startRect.getY());
+		this.drawHopRect(gl, endSecondHalf, outline, fill);
+
+		final Point2D.Float endSecHalfBot =  new Point2D.Float((float)endSecondHalf.getX() + DELTA, (float)endSecondHalf.getY());
+		final Point2D.Float endSecHalfTop = new Point2D.Float((float)endSecondHalf.getX() + DELTA + OFFSET,(float)endSecondHalf.getY() + HEIGHT);
+		final Point2D.Float startSecHalf = this.computeStartDiagRect(endSecHalfBot, endSecHalfTop);
+		this.drawHopRect(gl, startSecHalf, outline, fill);
+		this.drawHopRect(gl, new Point2D.Float((float)startSecHalf.getX() - OFFSET, (float)startSecHalf.getY() - HEIGHT), outline, fill);
+
+		this.drawHopRect(gl, new Point2D.Float((float)startRect.getX() + DELTA*6, (float)startRect.getY()), outline, fill);
+	}
+
+	private void drawHopRect(GL2 gl, Point2D sourcePoint, float[] outlineColor, float[] fillColor)
+	{
+		final float DELTA = 0.1f;
+		final float OFFSET = 0.015f;
+		final float HEIGHT = DELTA;
+
+		final Point2D.Float one = (Point2D.Float)sourcePoint;
+		final Point2D.Float two =  new Point2D.Float((float)one.getX() + DELTA, (float)one.getY());
+		final Point2D.Float three = new Point2D.Float((float)one.getX() + DELTA + OFFSET,(float)one.getY() + HEIGHT);
+		final Point2D.Float four = new Point2D.Float((float)one.getX() + OFFSET, (float)one.getY() + HEIGHT);
+		this.drawQuad(gl, one, two, three, four, fillColor);
+		this.drawLine(gl, one, two, outlineColor);
+		this.drawLine(gl, two, three, outlineColor);
+		this.drawLine(gl, three, four, outlineColor);
+		this.drawLine(gl, four, one, outlineColor);
+	}
+
+	private void drawQuad(GL2 gl, Point2D one, Point2D two, Point2D three, Point2D four, float[] color)
+	{
+		gl.glBegin(gl.GL_QUADS);
+		gl.glColor3f(color[0], color[1], color[2]);
+		gl.glVertex2d(one.getX(), one.getY());
+		gl.glVertex2d(two.getX(), two.getY());
+		gl.glVertex2d(three.getX(), three.getY());
+		gl.glVertex2d(four.getX(), four.getY());
+		gl.glEnd();
+	}
+
+	private void drawLine(GL2 gl, Point2D start, Point2D end, float[] color)
+	{
+		gl.glBegin(GL.GL_LINES);
+		gl.glColor3f(color[0], color[1], color[2]);
+		gl.glVertex2d(start.getX(), start.getY());
+		gl.glVertex2d(end.getX(), end.getY());
+		gl.glEnd();
+	}
+
+	private Point2D.Float computeStartDiagRect(Point2D start, Point2D end)
+	{
+		float rise = (float)(end.getY() - start.getY()) / 2.0f;
+		float run = (float)(end.getX() - start.getX()) / 2.0f;
+		return new Point2D.Float((float)start.getX() + run, (float)start.getY() + rise);
+	}
 
 	// This page is helpful (scroll down to "Drawing Lines and Polygons"):
 	// http://www.linuxfocus.org/English/January1998/article17.html
