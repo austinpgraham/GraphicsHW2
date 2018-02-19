@@ -150,6 +150,33 @@ public final class Homework02
 		this.drawMoon(gl);
 
 		this.drawGreenHouse(gl);
+
+		// Draw far left fence
+		for(float x = -1.0f, count = 0; count < 3; x += 0.05f, count++)
+		{
+			final Point2D.Float start = new Point2D.Float(x, ROAD_LIM);
+			this.drawFencePost(gl, start);
+		}
+
+		// Draw right side fence
+		for(float x = -0.45f, count = 0; count < 4; x += 0.05f, count++)
+		{
+			final Point2D.Float start = new Point2D.Float(x, ROAD_LIM);
+			this.drawFencePost(gl, start);
+		}
+
+		// Draw far right fence
+		final Point2D.Float first = new Point2D.Float(MAX_X - 2*0.05f, ROAD_LIM);
+		this.drawFencePost(gl, first);
+		final Point2D.Float reflected = new Point2D.Float(MAX_X - 0.05f, ROAD_LIM);
+		this.drawReflectedFencePost(gl, reflected);
+
+		this.drawRightBrownHouse(gl);
+
+		final Point2D.Float first_left = new Point2D.Float(MAX_X - 4*0.05f - 0.4f, ROAD_LIM);
+		this.drawFencePost(gl, first_left);
+		final Point2D.Float reflected_left = new Point2D.Float(MAX_X - 3*0.05f - 0.4f, ROAD_LIM);
+		this.drawReflectedFencePost(gl, reflected_left);
 	}
 
 	//**********************************************************************
@@ -280,14 +307,55 @@ public final class Homework02
 
 	private void drawGreenHouse(GL2 gl)
 	{
-		final float[] DARK_GREEN = new float[]{};
+		final float WIDTH = 0.4f;
+		final float HEIGHT = 0.4f;
 
-		final Point2D.Float houseStart = new Point2D.Float(-0.85, ROAD_LIM);
-		
-		final Point2D.Float windowStart = new Point2D.Float(0.0f, 0.0f);
+		final float[] DARK_GREEN = new float[]{85f/255f, 107f/255f, 47f/255f};
+		final float[] DARK_GRAY = new float[]{0.3f, 0.3f, 0.3f};
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+
+		final Point2D.Float houseStart = new Point2D.Float(-0.85f, ROAD_LIM);
+		final Point2D.Float right_bot = new Point2D.Float((float)houseStart.getX() + WIDTH, (float)houseStart.getY());
+		final Point2D.Float right_top = new Point2D.Float((float)houseStart.getX() + WIDTH, (float)houseStart.getY() + HEIGHT);
+		final Point2D.Float left_top = new Point2D.Float((float)houseStart.getX(), (float)houseStart.getY() + HEIGHT);
+		this.drawQuad(gl, houseStart, right_bot, right_top, left_top, DARK_GREEN);
+		this.drawLine(gl, houseStart, right_bot, BLACK);
+		this.drawLine(gl, right_bot, right_top, BLACK);
+		this.drawLine(gl, right_top, left_top, BLACK);
+		this.drawLine(gl, left_top, houseStart, BLACK);
+
+		final Point2D.Float windowStart = new Point2D.Float((float)houseStart.getX() + 0.25f, (float)houseStart.getY() + HEIGHT / 2.0f);
 		final Point2D.Float doorStart = new Point2D.Float(-0.8f, ROAD_LIM);
 		this.drawWindow(gl, windowStart);
 		this.drawDoor(gl, doorStart);
+
+		final Point2D.Float roofSource = new Point2D.Float((float)houseStart.getX() + WIDTH / 2.0f, 0.05f);
+		this.drawTriangle(gl, roofSource, left_top, right_top, DARK_GRAY);
+		this.drawLine(gl, roofSource, left_top, BLACK);
+		this.drawLine(gl, roofSource, right_top, BLACK);
+		this.drawLine(gl, roofSource, new Point2D.Float((float)left_top.getX() + WIDTH / 3.0f, (float)left_top.getY()), BLACK);
+		this.drawLine(gl, roofSource, new Point2D.Float((float)left_top.getX() + WIDTH / 3.0f * 2.0f, (float)left_top.getY()), BLACK);
+		this.drawLine(gl, roofSource, new Point2D.Float((float)left_top.getX() + WIDTH / 6.0f, (float)left_top.getY()), BLACK);
+		this.drawLine(gl, roofSource, new Point2D.Float((float)left_top.getX() + WIDTH / 6.0f * 5.0f, (float)left_top.getY()), BLACK);
+	}
+
+	private void drawRightBrownHouse(GL2 gl)
+	{
+		final float WIDTH = 0.4f;
+		final float HEIGHT = 0.4f;
+
+		final float[] BROWN = new float[]{85f/255f, 107f/255f, 47f/255f};
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+
+		final Point2D.Float houseStart = new Point2D.Float(0.5f, ROAD_LIM);
+		final Point2D.Float right_bot = new Point2D.Float((float)houseStart.getX() + WIDTH, (float)houseStart.getY());
+		final Point2D.Float right_top = new Point2D.Float((float)houseStart.getX() + WIDTH, (float)houseStart.getY() + HEIGHT);
+		final Point2D.Float left_top = new Point2D.Float((float)houseStart.getX(), (float)houseStart.getY() + HEIGHT);
+		this.drawQuad(gl, houseStart, right_bot, right_top, left_top, BROWN);
+		this.drawLine(gl, houseStart, right_bot, BLACK);
+		this.drawLine(gl, right_bot, right_top, BLACK);
+		this.drawLine(gl, right_top, left_top, BLACK);
+		this.drawLine(gl, left_top, houseStart, BLACK);
 	}
 
 	private void drawWindow(GL2 gl, Point2D pos)
@@ -317,6 +385,44 @@ public final class Homework02
 		this.drawLine(gl, left_top, start, BLACK, LINE_WIDTH);
 		this.drawLine(gl, left_middle, right_middle, BLACK, LINE_WIDTH);
 		this.drawLine(gl, top_middle, bot_middle, BLACK, LINE_WIDTH);
+	}
+
+	private void drawFencePost(GL2 gl, Point2D source)
+	{
+		final float WIDTH = 0.05f;
+		final float HEIGHT = 0.3f;
+
+		final float[] BEIGE = new float[]{0.9f, 0.837f, 0.735f};
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+
+		final Point2D.Float start = (Point2D.Float)source;
+		final Point2D.Float right_bot = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY());
+		final Point2D.Float right_top = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY() + HEIGHT);
+		final Point2D.Float left_top = new Point2D.Float((float)start.getX(), (float)right_top.getY() - 0.05f);
+		this.drawQuad(gl, start, right_bot, right_top, left_top, BEIGE);
+		this.drawLine(gl, start, right_bot, BLACK);
+		this.drawLine(gl, right_bot, right_top, BLACK);
+		this.drawLine(gl, right_top, left_top, BLACK);
+		this.drawLine(gl, left_top, start, BLACK);
+	}
+
+	private void drawReflectedFencePost(GL2 gl, Point2D source)
+	{
+		final float WIDTH = 0.05f;
+		final float HEIGHT = 0.3f;
+
+		final float[] BEIGE = new float[]{0.9f, 0.837f, 0.735f};
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+
+		final Point2D.Float start = (Point2D.Float)source;
+		final Point2D.Float right_bot = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY());
+		final Point2D.Float right_top = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY() + HEIGHT - 0.05f);
+		final Point2D.Float left_top = new Point2D.Float((float)start.getX(), (float)start.getY() + HEIGHT);
+		this.drawQuad(gl, start, right_bot, right_top, left_top, BEIGE);
+		this.drawLine(gl, start, right_bot, BLACK);
+		this.drawLine(gl, right_bot, right_top, BLACK);
+		this.drawLine(gl, right_top, left_top, BLACK);
+		this.drawLine(gl, left_top, start, BLACK);
 	}
 
 	private void drawDoor(GL2 gl, Point2D pos)
