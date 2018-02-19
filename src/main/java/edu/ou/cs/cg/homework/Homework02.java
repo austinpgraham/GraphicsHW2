@@ -60,7 +60,8 @@ public final class Homework02
 	private final float MAX_X = 1.0f;
 	private final float MAX_Y = 1.0f;
 
-	private final float ROAD_LIM = -0.55f;
+	private final float ROAD_LIM = -0.6f;
+	private final float GRASS_LIM = -0.05f;
 
 	//**********************************************************************
 	// Main
@@ -73,9 +74,9 @@ public final class Homework02
 		GLCanvas		canvas = new GLCanvas(capabilities);
 		JFrame			frame = new JFrame("Homework02");
 
-		canvas.setPreferredSize(new Dimension(1050, 550));
+		canvas.setPreferredSize(new Dimension(550, 550));
 
-		frame.setBounds(50, 50, 1000, 500);
+		frame.setBounds(50, 50, 500, 500);
 		frame.getContentPane().add(canvas);
 		frame.pack();
 		frame.setVisible(true);
@@ -141,6 +142,14 @@ public final class Homework02
 
 		// Draw the road
 		this.drawRoad(gl);
+
+		this.drawGrass(gl);
+
+		this.drawSky(gl);
+
+		this.drawMoon(gl);
+
+		this.drawGreenHouse(gl);
 	}
 
 	//**********************************************************************
@@ -227,16 +236,109 @@ public final class Homework02
 		final float DELTA = 0.1f;
 		final float OFFSET = 0.015f;
 		final float HEIGHT = DELTA;
+		final float LINE_WIDTH = 3.0f;
 
 		final Point2D.Float one = (Point2D.Float)sourcePoint;
 		final Point2D.Float two =  new Point2D.Float((float)one.getX() + DELTA, (float)one.getY());
 		final Point2D.Float three = new Point2D.Float((float)one.getX() + DELTA + OFFSET,(float)one.getY() + HEIGHT);
 		final Point2D.Float four = new Point2D.Float((float)one.getX() + OFFSET, (float)one.getY() + HEIGHT);
 		this.drawQuad(gl, one, two, three, four, fillColor);
-		this.drawLine(gl, one, two, outlineColor);
-		this.drawLine(gl, two, three, outlineColor);
-		this.drawLine(gl, three, four, outlineColor);
-		this.drawLine(gl, four, one, outlineColor);
+		this.drawLine(gl, one, two, outlineColor, LINE_WIDTH);
+		this.drawLine(gl, two, three, outlineColor, LINE_WIDTH);
+		this.drawLine(gl, three, four, outlineColor, LINE_WIDTH);
+		this.drawLine(gl, four, one, outlineColor, LINE_WIDTH);
+	}
+
+	private void drawGrass(GL2 gl)
+	{
+		final Point2D.Float one = new Point2D.Float(-1.0f, GRASS_LIM);
+		final Point2D.Float two = new Point2D.Float(MAX_X, GRASS_LIM);
+		final Point2D.Float three = new Point2D.Float(MAX_X, ROAD_LIM);
+		final Point2D.Float four = new Point2D.Float(-1.0f, ROAD_LIM);
+		final float[] purple = new float[]{25f/255f, 0f, 30f/255f};
+		final float[] green = new float[]{40f/255f, 145f/255f, 40f/255f};
+		this.drawQuadGradient(gl, one, two, three, four, purple, green);
+	}
+
+	private void drawSky(GL2 gl)
+	{
+		final Point2D.Float one = new Point2D.Float(-1.0f, 1.0f);
+		final Point2D.Float two = new Point2D.Float(MAX_X, 1.0f);
+		final Point2D.Float three = new Point2D.Float(MAX_X, GRASS_LIM);
+		final Point2D.Float four = new Point2D.Float(-1.0f, GRASS_LIM);
+		final float[] purple = new float[]{0f, 0f, 0f};
+		final float[] green = new float[]{83f/255f, 83f/255f, 73f/255f};
+		this.drawQuadGradient(gl, one, two, three, four, purple, green);
+	}
+
+	private void drawMoon(GL2 gl)
+	{
+		final float[] gray = new float[]{50f/255f, 50f/255f, 50f/255f};
+		final Point2D.Float center = new Point2D.Float(-0.85f, 0.75f);
+		this.drawCircle(gl, center, 0.15f, 0.0, 360.0, gray);
+	}
+
+	private void drawGreenHouse(GL2 gl)
+	{
+		final float[] DARK_GREEN = new float[]{};
+
+		final Point2D.Float houseStart = new Point2D.Float(-0.85, ROAD_LIM);
+		
+		final Point2D.Float windowStart = new Point2D.Float(0.0f, 0.0f);
+		final Point2D.Float doorStart = new Point2D.Float(-0.8f, ROAD_LIM);
+		this.drawWindow(gl, windowStart);
+		this.drawDoor(gl, doorStart);
+	}
+
+	private void drawWindow(GL2 gl, Point2D pos)
+	{
+		final float DIM = 0.1f;
+		final float LINE_WIDTH = 3.0f;
+
+		final float[] LIGHT_PURPLE = new float[]{230f/255f, 230f/255f, 250f/255f};
+		final float[] YELLOW = new float[]{1f, 250f/255f, 205f/255f};
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+
+		final Point2D.Float start = (Point2D.Float)pos;
+		final Point2D.Float right_bot = new Point2D.Float((float)start.getX() + DIM, (float)start.getY());
+		final Point2D.Float right_top = new Point2D.Float((float)start.getX() + DIM, (float)start.getY() + DIM);
+		final Point2D.Float left_top = new Point2D.Float((float)start.getX(), (float)start.getY()+DIM);
+		final Point2D.Float top_middle = new Point2D.Float((float)left_top.getX() + DIM / 2.0f, (float)left_top.getY());
+		final Point2D.Float bot_middle = new Point2D.Float((float)start.getX() + DIM / 2.0f, (float)start.getY());
+		final Point2D.Float left_middle = new Point2D.Float((float)left_top.getX(), (float)left_top.getY() - DIM / 2.0f);
+		final Point2D.Float right_middle = new Point2D.Float((float)right_top.getX(), (float)right_top.getY() - DIM / 2.0f);
+		this.drawQuad(gl, start, right_bot, right_top, left_top, LIGHT_PURPLE);
+		this.drawTriangle(gl, start, right_bot, top_middle, YELLOW);
+		this.drawLine(gl, start, top_middle, BLACK);
+		this.drawLine(gl, top_middle, right_bot, BLACK);
+		this.drawLine(gl, start, right_bot, BLACK, LINE_WIDTH);
+		this.drawLine(gl, right_bot, right_top, BLACK, LINE_WIDTH);
+		this.drawLine(gl, right_top, left_top, BLACK, LINE_WIDTH);
+		this.drawLine(gl, left_top, start, BLACK, LINE_WIDTH);
+		this.drawLine(gl, left_middle, right_middle, BLACK, LINE_WIDTH);
+		this.drawLine(gl, top_middle, bot_middle, BLACK, LINE_WIDTH);
+	}
+
+	private void drawDoor(GL2 gl, Point2D pos)
+	{
+		final float HEIGHT = 0.2f;
+		final float WIDTH = 0.1f;
+
+		final float[] BLACK = new float[]{0f, 0f, 0f};
+		final float[] LIGHT_BROWN = new float[]{205f/255f, 133f/255f, 63f/255f};
+		final float[] LIGHT_GRAY = new float[]{0.75f, 0.75f, 0.75f};
+
+		final Point2D.Float start = (Point2D.Float)pos;
+		final Point2D.Float right_bot = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY());
+		final Point2D.Float top_right = new Point2D.Float((float)start.getX() + WIDTH, (float)start.getY() + HEIGHT);
+		final Point2D.Float top_left = new Point2D.Float((float)start.getX(), (float)start.getY() + HEIGHT);
+		final Point2D.Float knob_center = new Point2D.Float((float)start.getX() + 0.015f, (float)start.getY() + HEIGHT / 2.0f);
+		this.drawQuad(gl, start, right_bot, top_right, top_left, LIGHT_BROWN);
+		this.drawLine(gl, start, right_bot, BLACK);
+		this.drawLine(gl, right_bot, top_right, BLACK);
+		this.drawLine(gl, top_right, top_left, BLACK);
+		this.drawLine(gl, top_left, start, BLACK);
+		this.drawCircle(gl, knob_center, 0.01f, 0.0f, 360f, LIGHT_GRAY);
 	}
 
 	private void drawQuad(GL2 gl, Point2D one, Point2D two, Point2D three, Point2D four, float[] color)
@@ -250,12 +352,61 @@ public final class Homework02
 		gl.glEnd();
 	}
 
+	private void drawTriangle(GL2 gl, Point2D one, Point2D two, Point2D three, float[] color)
+	{
+		gl.glBegin(gl.GL_TRIANGLES);
+		gl.glColor3f(color[0], color[1], color[2]);
+		gl.glVertex2d(one.getX(), one.getY());
+		gl.glVertex2d(two.getX(), two.getY());
+		gl.glVertex2d(three.getX(), three.getY());
+		gl.glEnd();
+	}
+
+	private void drawQuadGradient(GL2 gl, Point2D one, Point2D two, Point2D three, Point2D four, float[] start, float[] end)
+	{
+		gl.glBegin(gl.GL_QUADS);
+		gl.glColor3f(start[0], start[1], start[2]);
+		gl.glVertex2d(one.getX(), one.getY());
+		gl.glVertex2d(two.getX(), two.getY());
+		gl.glColor3f(end[0], end[1], end[2]);
+		gl.glVertex2d(three.getX(), three.getY());
+		gl.glVertex2d(four.getX(), four.getY());
+		gl.glEnd();
+	}
+
 	private void drawLine(GL2 gl, Point2D start, Point2D end, float[] color)
 	{
 		gl.glBegin(GL.GL_LINES);
 		gl.glColor3f(color[0], color[1], color[2]);
 		gl.glVertex2d(start.getX(), start.getY());
 		gl.glVertex2d(end.getX(), end.getY());
+		gl.glEnd();
+	}
+
+	private void drawLine(GL2 gl, Point2D start, Point2D end, float[] color, float width)
+	{
+		gl.glLineWidth(width);
+		gl.glBegin(GL.GL_LINES);
+		gl.glColor3f(color[0], color[1], color[2]);
+		gl.glVertex2d(start.getX(), start.getY());
+		gl.glVertex2d(end.getX(), end.getY());
+		gl.glEnd();
+		gl.glLineWidth(1.0f);
+	}
+
+	private void drawCircle(GL2 gl, Point2D center, float radius, double start, double end, float[] color)
+	{
+		gl.glBegin(GL.GL_TRIANGLE_FAN);
+		gl.glColor3f(color[0], color[1], color[2]);
+		gl.glVertex2d(center.getX(), center.getY());
+		double centx = center.getX();
+		double centy = center.getY();
+		for(double angle = start; angle <= end; angle++)
+		{
+			double x = centx + Math.cos(Math.toRadians(angle))*radius;
+			double y = centy + Math.sin(Math.toRadians(angle))*radius;
+			gl.glVertex2d(x,y);
+		}
 		gl.glEnd();
 	}
 
